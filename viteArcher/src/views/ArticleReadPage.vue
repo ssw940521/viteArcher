@@ -1,9 +1,12 @@
 <template>
-    <el-container
+    <div
         :direction="vertical"
         class="article"
     >
-        <ArticleComponent class="content">
+        <ArticleComponent
+            class="content"
+            :tags="tags"
+        >
             <template v-slot:tag>
                 {{ currentArticle.tag }}
             </template>
@@ -14,10 +17,12 @@
                 {{ currentArticle.author }}
             </template>
             <template v-slot:content>
-                {{ currentArticle.content }}
+                <div v-html="currentArticle.content">
+
+                </div>
             </template>
         </ArticleComponent>
-    </el-container>
+    </div>
 
 
 </template>
@@ -28,40 +33,48 @@ import instance from '../utils/http';
 export default {
     data() {
         return {
-            currentArticle: {}
+            currentArticle: {},
+            tags: []
         }
     },
     // 生命周期 - 创建完成（访问当前this实例）
     created() {
+
     },
     // 生命周期 - 挂载完成（访问DOM元素）
-    mounted() {
-        console.log(this.$route.params.id);
-        this.getArticleContentById(this.$route.params.id)
+    async mounted() {
+        await this.getArticleContentById(this.$route.params.id)
+        this.getTags()
+
     },
     // methods方法
     methods: {
-        getArticleContentById(articleId) {
-            instance.get('/articleApi/article/getArticleById/'+articleId)
+        async getArticleContentById(articleId) {
+          await instance.get('/articleApi/article/getArticleById/' + articleId)
                 .then(
-                    (response) => { this.currentArticle = response.data;
-                    console.log(response.data) }
+                    (response) => {
+                        this.currentArticle = response.data;
+                    }
                 )
                 .catch(
                     function (error) {
                         console.log(error);
                     }
                 )
+        },
+        getTags() {
+            this.tags = this.currentArticle.tag.split('|')
         }
     },
     components: { ArticleComponent }
+
 }
 </script>
 <style scoped>
 /* @import url(); 引入css类 */
 .article {
     justify-content: center;
-
+    text-align: start;
 }
 
 .content {

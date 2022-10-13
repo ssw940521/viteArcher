@@ -14,73 +14,48 @@
                         style="background-color: var(--part-color);"
                         router="true"
                     >
-                        <el-sub-menu index="1">
+                        <el-sub-menu
+                            v-for="(primary,index) in indexTree"
+                            :index="index"
+                        >
                             <template #title>
                                 <el-icon>
-                                    <Promotion />
+                                    <component
+                                        :is="getIcon(primary.name)"
+                                        style="width: 1em; height:1em;"
+                                    />
                                 </el-icon>
-                                <span>游戏</span>
+                                <span>{{primary.name}}</span>
                             </template>
                             <el-menu-item
-                                v-for="item in articleIndex"
-                                :index="`/article/${item.id}`"
-                                :key="item.id"
+                                    v-for="article in articleIndexTree[primary.name]"
+                                    :index="`/article/${article.id}`"
+                                    :key="article.id"
+                                >
+                                    {{article.title}}
+                                </el-menu-item>
+                            <el-sub-menu
+                                v-for="(secondary,subIndex) in primary.subTags"
+                                :index="index+'-'+subIndex"
                             >
-                            {{item.title}}
-                            </el-menu-item>
-
-                            <!-- <el-menu-item index="1-1">item one</el-menu-item>
-                            <el-menu-item index="1-2">item two</el-menu-item>
-                            <el-menu-item index="1-3">item three</el-menu-item>
-                            <el-menu-item index="1-4-1">item Four</el-menu-item> -->
+                                <template #title>
+                                    <span>{{secondary.name}}</span>
+                                </template>
+                                <el-menu-item
+                                    v-for="article in articleIndexTree[secondary.name]"
+                                    :index="`/article/${article.id}`"
+                                    :key="article.id"
+                                >
+                                    {{article.title}}
+                                </el-menu-item>
+                            </el-sub-menu>
                         </el-sub-menu>
-                        <el-menu-item index="2" disabled>
-                            <el-icon>
-                                <Reading />
-                            </el-icon>
-                            <span>前端</span>
-                        </el-menu-item>
-                        <el-menu-item index="3" disabled>
-                            <el-icon>
-                                <Shop />
-                            </el-icon>
-                            <span>杂谈</span>
-                        </el-menu-item>
-                        <el-menu-item index="4" disabled>
-                            <el-icon>
-                                <Folder />
-                            </el-icon>
-                            <span>归档</span>
-                        </el-menu-item>
                     </el-menu>
                 </el-col>
             </el-row>
         </el-aside>
         <el-main class="artile">
-            <div class="title">
-                <h1>文章列表</h1>
-            </div>
-            <router-link
-                :to="`/article/${item.id}`"
-                v-for="item in articleIndex"
-                :key="item.id"
-                class="articleCard"
-            >
-                <el-card shadow="hover">
-                    <template #header>
-                        <div class="card-header">
-                            <span class="cardTitle">{{ item.title }}</span>
-                            <div class="info">
-                                <p>作者:{{ item.author }} </p>
-                                <p>时间:{{ formatedDate(item.created) }}</p>
-                            </div>
-                        </div>
-                    </template>
-                    <div class="card-content">
-                        {{ item.intro }}...
-                    </div>
-                </el-card>
-            </router-link>
+            <router-view></router-view>
         </el-main>
         <el-aside class="aside"></el-aside>
     </el-container>
@@ -88,10 +63,20 @@
 
 <script>
 import instance from '../utils/http';
+
+const iconMap = {
+    游戏: 'SwitchFilled',
+    前端: 'ElementPlus',
+    杂谈: 'GoodsFilled',
+    default: 'Folder'
+}
+
 export default {
     data() {
         return {
-            articleIndex: null
+            icon: 'Promotion',
+            articleIndexTree: null,
+            indexTree: null
         }
     },
     // 生命周期 - 创建完成（访问当前this实例）
@@ -100,27 +85,51 @@ export default {
     },
     // 生命周期 - 挂载完成（访问DOM元素）
     mounted() {
-        this.getArticleList();
+        
+        this.getArticleIndexTree();
+        this.getIndexTree();
+
     },
     setup() {
 
     },
     // methods方法
     methods: {
-        getArticleList() {
-            instance.post('/articleApi/article/getArticleList', {
-                currentPage: "1",
-                totalPage: "10"
-            })
-                .then((response) => {
-                    this.articleIndex = response.data;
-                }).catch(function (error) {
-                    console.log(error);
-                });
+    
+        processIndex() {
+            for (var article of this.articleIndex) {
+                let tags = article.tag.split('|');
+                for (var tag of tags) {
+                    if (this.indexTree[tag] != undefined) {
+
+                    }
+                }
+            }
         },
-        formatedDate(date) {
-            let pattern = /\d+-\d+-\d+/
-            return date.match(pattern)[0];
+        getArticleIndexTree() {
+            instance.get('/articleApi/article/getArticleIndexTree')
+                .then((response) => {
+                    this.articleIndexTree = response.data
+                    console.log(this.articleIndexTree["基础"][0].id)
+                }).catch((error) => {
+                    console.log(error);
+                })
+        },
+        getIndexTree() {
+            instance.get('/articleApi/article/getArticleClass')
+                .then((response) => {
+                    this.indexTree = response.data;
+                }).catch((error) => {
+                    console.log(error);
+                })
+        },
+        getIcon(indexName) {
+            if (iconMap[indexName] !== undefined) {
+                return iconMap[indexName];
+            } else {
+                return iconMap.default;
+            }
+
         }
     },
     computed: {
@@ -133,6 +142,17 @@ export default {
 </script>
 <style scoped>
 /* @import url(); 引入css类 */
+.artile {
+    /* padding-left: 150px;
+    padding-right: 150px; */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-basis: 60%;
+    justify-content: left;
+    overflow-x: hidden;
+    
+}
 .main {
     width: 80%;
     margin-left: auto;
@@ -143,58 +163,10 @@ export default {
     display: flex;
 }
 
-.artile {
-    /* padding-left: 150px;
-    padding-right: 150px; */
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    flex-basis: 60%;
-    justify-content: left;
-}
-
-.articleCard {
-    margin-left: auto;
-    margin-right: auto;
-    margin-top: 25px;
-    width: 100%;
-    text-decoration: none;
-}
-
-.card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.card-content {
-    /* margin-bottom: 18px; */
-    text-align: start;
-}
-
 .aside {
     flex-basis: 20%;
     background-color: var(--part-color);
 }
 
-.title {
-    align-self: start;
-}
 
-.info {
-    align-self: end;
-    text-align: left;
-}
-
-.cardTitle {
-    position: relative;
-
-    flex-basis: 70%;
-    text-align: left;
-
-}
-
-div p {
-    margin: 1px;
-}
 </style>

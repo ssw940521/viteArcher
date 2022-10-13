@@ -5,11 +5,12 @@ import ShowCase from '@/views/ShowCase.vue'
 import ResourcesPage from '@/views/ResourcesPage.vue'
 import ArticleReadPage from '@/views/ArticleReadPage.vue'
 import EditorPage from '@/views/EditorPage.vue'
+import ArticleListView from '@/views/ArticleListView.vue';
 
 const routes = [
   {
     path: '/',
-    redirect: '/article'
+    redirect: '/article/list'
   },
   {
     path: '/',
@@ -22,7 +23,19 @@ const routes = [
       {
         path: '/article',
         name: 'article',
-        component: ArticlePage
+        component: ArticlePage,
+        children: [
+          {
+            path: '/article/list',
+            name: 'articleList',
+            component: ArticleListView
+          },
+          {
+            path: '/article/:id',
+            name: 'articleId',
+            component: ArticleReadPage
+          }
+        ]
       },
       {
         path: '/show',
@@ -33,10 +46,6 @@ const routes = [
         path: '/resources',
         name: 'resources',
         component: ResourcesPage
-      },{
-        path: '/article/:id',
-        name: 'articleId',
-        component: ArticleReadPage
       }
      
     ]

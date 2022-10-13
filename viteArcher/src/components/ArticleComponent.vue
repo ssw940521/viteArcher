@@ -5,11 +5,13 @@
         </div>
         <div class="info">
             <el-tag
+                class="tag"
                 type="info"
                 size="small"
                 effect="dark"
+                v-for="tag in tags"
             >
-                <slot name="tag"></slot>
+              {{tag}}
             </el-tag>
             <span>
                 <slot name="author"></slot>
@@ -24,6 +26,7 @@
 
 <script>
 export default {
+    props:['tags'],
     data() {
         return {
 
@@ -66,4 +69,8 @@ export default {
     padding: 10px;
     align-items: center;
 } 
+.tag{
+    margin-left: 2px;
+    margin-right: 2px;
+}
 </style>

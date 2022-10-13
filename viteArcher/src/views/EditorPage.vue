@@ -36,8 +36,6 @@
             >
             </el-cascader>
             </div>
-           
-
             <Toolbar
                 style="border-bottom: 1px solid #ccc"
                 :editor="editorRef"
@@ -71,7 +69,6 @@ import instance from '../utils/http'
 export default {
     data() {
         return {
-            optionValue: null,
             options: null
         }
     },
@@ -127,7 +124,7 @@ export default {
     setup() {
         let articleTitle = ref('');
         let articleAuthor = ref('');
-        let articleTag = ref('游戏');
+        let optionValue = ref([]);
         // 编辑器实例，必须用 shallowRef
         const editorRef = shallowRef();
 
@@ -157,18 +154,22 @@ export default {
         }
         const saveArticle = () => {
             const editor = editorRef.value
-            console.log(editor)
             if (editor == null) {
                 console.log('空的');
                 return;
             }
-            console.log(articleTitle)
+            let tags = ""
+            for(var tag of optionValue.value){
+               tags+= tag
+               tags+='|'
+            }
+            tags-='|'
+            console.log(articleAuthor.value)
             instance.post('articleApi/article/addArticle', {
                 title: articleTitle.value,
                 author: articleAuthor.value,
-                tag: articleTag.value,
+                tag: tags,
                 content: editor.getHtml()
-
             }).then((response) => {
                 console.log(response);
             }).catch((error) => {
@@ -184,7 +185,7 @@ export default {
             handleCreated,
             articleTitle,
             articleAuthor,
-            articleTag,
+            optionValue,
             saveArticle
         };
     }
