@@ -1,40 +1,43 @@
 <template>
     <div>
         <div style="text-align: center;">编辑器</div>
-        <div style="border: 1px solid #ccc" class="edit">
+        <div
+            style="border: 1px solid #ccc"
+            class="edit"
+        >
             <div>
                 <span>标题：</span>
-            <el-input
-                v-model="articleTitle"
-                placeholder="输入标题"
-                clearable
-                @change=""
-                class="input"
-            ></el-input>
+                <el-input
+                    v-model="articleTitle"
+                    placeholder="输入标题"
+                    clearable
+                    @change=""
+                    class="input"
+                ></el-input>
             </div>
-            
+
             <div>
                 <span>作者：</span>
-            <el-input
-                v-model="articleAuthor"
-                placeholder="输入作者"
-                clearable
-                @change=""
-                class="input"
-            ></el-input>
+                <el-input
+                    v-model="articleAuthor"
+                    placeholder="输入作者"
+                    clearable
+                    @change=""
+                    class="input"
+                ></el-input>
             </div>
-           
+
             <div>
                 <span>分类：</span>
-            <el-cascader
-                :options="options"
-                v-model="optionValue"
-                clearable
-                filterable
-                :props="{ expandTrigger: 'hover'}"
-                @change="showTag"
-            >
-            </el-cascader>
+                <el-cascader
+                    :options="options"
+                    v-model="optionValue"
+                    clearable
+                    filterable
+                    :props="{ expandTrigger: 'hover'}"
+                    @change="showTag"
+                >
+                </el-cascader>
             </div>
             <Toolbar
                 style="border-bottom: 1px solid #ccc"
@@ -66,6 +69,8 @@ import '@wangeditor/editor/dist/css/style.css' // 引入 css
 import { onBeforeUnmount, ref, shallowRef, onMounted } from 'vue'
 import { Editor, Toolbar } from '@wangeditor/editor-for-vue'
 import instance from '../utils/http'
+import { ElNotification } from 'element-plus'
+
 export default {
     data() {
         return {
@@ -116,7 +121,7 @@ export default {
 
             return primaryOptions;
         },
-        showTag(){
+        showTag() {
             console.log(this.optionValue);
         }
     },
@@ -130,7 +135,6 @@ export default {
 
         // 内容 HTML
         const valueHtml = ref('<p>hello</p>')
-
         // 模拟 ajax 异步获取内容
         onMounted(() => {
             setTimeout(() => {
@@ -139,7 +143,7 @@ export default {
         })
 
         const toolbarConfig = {}
-        const editorConfig = { placeholder: '请输入内容...' }
+        const editorConfig = { placeholder: '请输入内容...', MENU_CONF: {} }
 
         // 组件销毁时，也及时销毁编辑器
         onBeforeUnmount(() => {
@@ -159,11 +163,11 @@ export default {
                 return;
             }
             let tags = ""
-            for(var tag of optionValue.value){
-               tags+= tag
-               tags+='|'
+            for (var tag of optionValue.value) {
+                tags += tag
+                tags += '|'
             }
-            tags-='|'
+            tags = tags.substring(0, tags.length - 1)
             console.log(articleAuthor.value)
             instance.post('articleApi/article/addArticle', {
                 title: articleTitle.value,
@@ -172,9 +176,24 @@ export default {
                 content: editor.getHtml()
             }).then((response) => {
                 console.log(response);
+                ElNotification({
+                    title: "保存文章",
+                    message:"成功！"
+                })
             }).catch((error) => {
                 console.log(error);
+                ElNotification({
+                    title: "保存文章",
+                    message: error
+                })
             })
+
+        }
+        editorConfig.MENU_CONF['uploadImage'] = {
+            server: 'articleApi/picture/getPicture',
+            fieldName: 'file',
+            base64LimitSize: 5 * 1024
+            // 上传图片的配置
         }
         return {
             editorRef,
@@ -196,8 +215,9 @@ export default {
 .input {
     width: 300px;
 }
-.edit{
-    display:flex;
+
+.edit {
+    display: flex;
     flex-direction: column;
     justify-content: flex-start;
     margin-left: 200px;

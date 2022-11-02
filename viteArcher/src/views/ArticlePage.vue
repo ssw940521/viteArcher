@@ -4,60 +4,58 @@
         class="main"
     >
         <el-aside class="aside">
-            <el-row class="tac">
-                <el-col>
-                    <h5 class="mb-2">文章分类导航</h5>
-                    <el-menu
-                        class="el-menu-vertical-demo"
-                        @open="handleOpen"
-                        @close="handleClose"
-                        style="background-color: var(--part-color);"
-                        router="true"
+            <div class="sideBar">
+                <h5 class="menuHeader">文章分类导航</h5>
+                <el-menu
+                    class="menu"
+                    @open="handleOpen"
+                    @close="handleClose"
+                    router="true"
+                >
+                    <el-sub-menu
+                        v-for="(primary,index) in indexTree"
+                        :index="index"
                     >
+                        <template #title>
+                            <el-icon>
+                                <component
+                                    :is="getIcon(primary.name)"
+                                    style="width: 1em; height:1em;"
+                                />
+                            </el-icon>
+                            <span>{{primary.name}}</span>
+                        </template>
+                        <el-menu-item
+                            v-for="article in articleIndexTree[primary.name]"
+                            :index="`/article/${article.id}`"
+                            :key="article.id"
+                        >
+                            {{article.title}}
+                        </el-menu-item>
                         <el-sub-menu
-                            v-for="(primary,index) in indexTree"
-                            :index="index"
+                            v-for="(secondary,subIndex) in primary.subTags"
+                            :index="index+'-'+subIndex"
                         >
                             <template #title>
-                                <el-icon>
-                                    <component
-                                        :is="getIcon(primary.name)"
-                                        style="width: 1em; height:1em;"
-                                    />
-                                </el-icon>
-                                <span>{{primary.name}}</span>
+                                <span>{{secondary.name}}</span>
                             </template>
                             <el-menu-item
-                                    v-for="article in articleIndexTree[primary.name]"
-                                    :index="`/article/${article.id}`"
-                                    :key="article.id"
-                                >
-                                    {{article.title}}
-                                </el-menu-item>
-                            <el-sub-menu
-                                v-for="(secondary,subIndex) in primary.subTags"
-                                :index="index+'-'+subIndex"
+                                v-for="article in articleIndexTree[secondary.name]"
+                                :index="`/article/${article.id}`"
+                                :key="article.id"
                             >
-                                <template #title>
-                                    <span>{{secondary.name}}</span>
-                                </template>
-                                <el-menu-item
-                                    v-for="article in articleIndexTree[secondary.name]"
-                                    :index="`/article/${article.id}`"
-                                    :key="article.id"
-                                >
-                                    {{article.title}}
-                                </el-menu-item>
-                            </el-sub-menu>
+                                {{article.title}}
+                            </el-menu-item>
                         </el-sub-menu>
-                    </el-menu>
-                </el-col>
-            </el-row>
+                    </el-sub-menu>
+                </el-menu>
+            </div>
+
         </el-aside>
         <el-main class="artile">
             <router-view></router-view>
         </el-main>
-        <el-aside class="aside"></el-aside>
+        <!-- <el-aside class="aside"></el-aside> -->
     </el-container>
 </template>
 
@@ -85,7 +83,7 @@ export default {
     },
     // 生命周期 - 挂载完成（访问DOM元素）
     mounted() {
-        
+
         this.getArticleIndexTree();
         this.getIndexTree();
 
@@ -95,7 +93,7 @@ export default {
     },
     // methods方法
     methods: {
-    
+
         processIndex() {
             for (var article of this.articleIndex) {
                 let tags = article.tag.split('|');
@@ -151,10 +149,11 @@ export default {
     flex-basis: 60%;
     justify-content: left;
     overflow-x: hidden;
-    
+
 }
+
 .main {
-    width: 80%;
+    width: auto;
     margin-left: auto;
     margin-right: auto;
 }
@@ -164,9 +163,27 @@ export default {
 }
 
 .aside {
-    flex-basis: 20%;
-    background-color: var(--part-color);
+    height: auto;
+    --el-menu-bg-color: var(--el-color-primary-light-3);
+    --el-menu-text-color: white;
+    --el-menu-hover-bg-color: var(--el-color-primary-light-5);
+    --el-menu-active-color : rgb(69, 81, 17);
 }
 
+.menuHeader {
+    background-color: var(--el-color-primary-light-3);
+    margin: auto;
+    padding: 16px;
+    color: white;
+    text-align: start;
+    font-size: large;
+}
 
+.menu {
+    border: 0px;
+}
+.sideBar{
+    min-height: 800px;
+    background-color: var(--el-color-primary-light-3);
+}
 </style>

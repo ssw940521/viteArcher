@@ -19,7 +19,7 @@
             ellipsis="false"
         >
             <el-menu-item
-                index="/article"
+                index="/article/list"
                 class="headbut"
             >文章</el-menu-item>
             <el-menu-item
@@ -134,10 +134,10 @@ export default {
 
 }
 
-.headbut {
+/* .headbut {
     position: relative;
     left: 50px;
-}
+} */
 
 .logo {
     position: relative;

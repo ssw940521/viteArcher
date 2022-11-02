@@ -71,7 +71,7 @@ export default {
     margin-top: 25px;
     width: 100%;
     text-decoration: none;
-    padding: 2px;
+    max-width: 1200px;
 }
 
 .card-header {
@@ -88,8 +88,8 @@ export default {
 }
 
 .title {
-    text-align: start;
-    align-self: start;
+    text-align: center;
+    align-self: center;
 }
 
 .info {
